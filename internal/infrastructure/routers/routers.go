@@ -24,6 +24,7 @@ func HandlerRouters() {
 	v1Router := chi.NewRouter()
 	v1Router.Get("/healthz", HandlerHealthz)
 	v1Router.Post("/create_user", HandlerCreateUser)
+	v1Router.Get("/get_user/{userID}", HandlerGetUserByID)
 
 	router.Mount("/v1", v1Router)
 
