@@ -26,6 +26,7 @@ func HandlerRouters() {
 	v1Router.Post("/create_user", HandlerCreateUser)
 	v1Router.Get("/get_user/{userID}", HandlerGetUserByID)
 	v1Router.Get("/get_users", HandlerGetUsers)
+	v1Router.Delete("/delete_user/{userID}", HandlerDeleteUser)
 
 	router.Mount("/v1", v1Router)
 
