@@ -16,9 +16,8 @@ func GetUserByID(userID string) (*entity.User, error) {
 	defer db.Close()
 
 	var user entity.User
-	err = db.QueryRow("SELECT id, name, email, velocity, fav_position, rating, biography, created_at FROM users WHERE id=$1", userID).Scan(
-		&user.ID, &user.Name, &user.Email, &user.Velocity, &user.Fav_position, &user.Rating, &user.Biography, &user.Created_at,
-	)
+	err = db.QueryRow("SELECT id, name, email, velocity, fav_position, rating, biography, created_at, image_url FROM users WHERE id=$1", userID).Scan(
+		&user.ID, &user.Name, &user.Email, &user.Velocity, &user.Fav_position, &user.Rating, &user.Biography, &user.Created_at, &user.Image_url)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("user not found: %v", err)
