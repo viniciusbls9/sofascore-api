@@ -10,5 +10,6 @@ type User struct {
 	Fav_position string    `json:"fav_position"`
 	Rating       int16     `json:"rating"`
 	Biography    string    `json:"biography"`
+	Image_url    string    `json:"image_url"`
 	Created_at   time.Time `json:"created_at"`
 }
