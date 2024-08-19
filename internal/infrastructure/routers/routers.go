@@ -23,11 +23,12 @@ func HandlerRouters() {
 
 	v1Router := chi.NewRouter()
 	v1Router.Get("/healthz", HandlerHealthz)
-	v1Router.Post("/create_user", HandlerCreateUser)
 	v1Router.Get("/get_user/{userID}", HandlerGetUserByID)
+	v1Router.Get("/get_user_by_email", HandlerGetUserByEmail)
 	v1Router.Get("/get_users", HandlerGetUsers)
+	v1Router.Post("/create_user", HandlerCreateUser)
+	v1Router.Patch("/vote_user", HandlerVoteUser)
 	v1Router.Delete("/delete_user/{userID}", HandlerDeleteUser)
-	v1Router.Post("/vote_user", HandlerVoteUser)
 
 	router.Mount("/v1", v1Router)
 
