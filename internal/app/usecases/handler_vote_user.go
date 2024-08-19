@@ -43,7 +43,12 @@ func HandlerVoteUser(w http.ResponseWriter, r *http.Request) {
 			utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
-		utils.RespondWithJSON(w, http.StatusOK, map[string]string{"message": "Vote removed successfully"})
+		user, err := GetUserByID(voteRequest.VotedUserID.String())
+		if err != nil {
+			utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		utils.RespondWithJSON(w, http.StatusOK, user)
 		return
 	}
 
@@ -66,5 +71,10 @@ func HandlerVoteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.RespondWithJSON(w, http.StatusOK, map[string]string{"message": "Vote successful"})
+	user, err := GetUserByID(voteRequest.VotedUserID.String())
+	if err != nil {
+		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	utils.RespondWithJSON(w, http.StatusOK, user)
 }
