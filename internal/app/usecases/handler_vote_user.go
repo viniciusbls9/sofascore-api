@@ -72,6 +72,14 @@ func HandlerVoteUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err := GetUserByID(voteRequest.VotedUserID.String())
+
+	if err != nil {
+		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	user.Has_voted, err = hasUserVoted(db, voteRequest.VoterID.String(), voteRequest.VotedUserID.String())
+
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return

@@ -10,6 +10,8 @@ import (
 )
 
 func HandlerGetUsers(w http.ResponseWriter, r *http.Request) {
+	loggedInUserID := r.URL.Query().Get("logged_user_id")
+
 	var users []entity.User
 
 	db, err := db.HandlerOpenDatabaseConnection()
@@ -34,6 +36,13 @@ func HandlerGetUsers(w http.ResponseWriter, r *http.Request) {
 			utils.RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Couldn't scan rows DB: %v", err))
 			return
 		}
+
+		user.Has_voted, err = hasUserVoted(db, loggedInUserID, user.ID)
+		if err != nil {
+			utils.RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to check vote status: %v", err))
+			return
+		}
+
 		users = append(users, user)
 	}
 	utils.RespondWithJSON(w, http.StatusOK, users)
