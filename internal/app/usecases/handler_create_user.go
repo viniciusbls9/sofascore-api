@@ -19,7 +19,7 @@ func HandlerCreateUserUseCase(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	existingUser, err := GetUserByEmail(user.Email)
+	existingUser, err := GetUserByEmail(user.Email, "")
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to check user existence: %v", err))
 		return

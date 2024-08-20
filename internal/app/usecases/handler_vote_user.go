@@ -37,7 +37,7 @@ func HandlerVoteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := GetUserByID(voteRequest.VotedUserID.String())
+	user, err := GetUserByID(voteRequest.VotedUserID.String(), voteRequest.VoterID.String())
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Couldn't retrieve user: %v", err))
 		return

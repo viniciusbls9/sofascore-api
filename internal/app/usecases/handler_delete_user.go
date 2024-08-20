@@ -14,7 +14,7 @@ func HandlerDeleteUserUseCase(w http.ResponseWriter, r *http.Request) {
 	var user entity.User
 	userID := chi.URLParam(r, "userID")
 
-	existingUser, err := GetUserByID(userID)
+	existingUser, err := GetUserByID(userID, "")
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to check user existence: %v", err))
 		return
