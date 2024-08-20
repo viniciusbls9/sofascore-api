@@ -10,8 +10,6 @@ import (
 )
 
 func HandlerGetUsers(w http.ResponseWriter, r *http.Request) {
-	loggedInUserID := r.URL.Query().Get("logged_user_id")
-
 	var users []entity.User
 
 	db, err := db.HandlerOpenDatabaseConnection()
@@ -32,18 +30,22 @@ func HandlerGetUsers(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var user entity.User
-		if err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Velocity, &user.Fav_position, &user.Rating, &user.Biography, &user.Created_at, &user.Image_url); err != nil {
+		if err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Fav_position, &user.Biography, &user.Created_at, &user.Image_url); err != nil {
 			utils.RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Couldn't scan rows DB: %v", err))
 			return
 		}
 
-		user.Has_voted, err = hasUserVoted(db, loggedInUserID, user.ID)
+		// Get the average user votes
+		averageVotes, err := getAverageVotes(db, user.ID)
 		if err != nil {
-			utils.RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to check vote status: %v", err))
+			utils.RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to calculate average votes: %v", err))
 			return
 		}
 
+		user.AverageVotes = averageVotes
+
 		users = append(users, user)
 	}
+
 	utils.RespondWithJSON(w, http.StatusOK, users)
 }
