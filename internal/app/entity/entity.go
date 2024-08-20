@@ -17,17 +17,19 @@ type VoteRequest struct {
 }
 
 type User struct {
-	ID           string       `json:"id"`
-	Name         string       `json:"name"`
-	Email        string       `json:"email"`
-	Fav_position string       `json:"fav_position"`
-	Biography    string       `json:"biography"`
-	Image_url    string       `json:"image_url"`
-	Created_at   time.Time    `json:"created_at"`
-	AverageVotes AverageVotes `json:"average_votes"`
+	ID               string       `json:"id"`
+	Name             string       `json:"name"`
+	Email            string       `json:"email"`
+	Fav_position     string       `json:"fav_position"`
+	Biography        string       `json:"biography"`
+	Image_url        string       `json:"image_url"`
+	Created_at       time.Time    `json:"created_at"`
+	AverageVotes     AverageVotes `json:"average_votes"`
+	CurrentUserVotes AverageVotes `json:"current_user_votes"`
 }
 
 type AverageVotes struct {
+	PassVote       int16   `json:"pass_vote"`
 	ShotVote       float64 `json:"shot_vote"`
 	MarkingVote    float64 `json:"marking_vote"`
 	QualityVote    float64 `json:"quality_vote"`
