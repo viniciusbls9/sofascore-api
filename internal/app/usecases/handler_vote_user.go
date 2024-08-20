@@ -31,58 +31,17 @@ func HandlerVoteUser(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	exists, err := ValidateVoteExists(db, voteRequest.VoterID, voteRequest.VotedUserID)
+	err = UpsertVote(db, voteRequest)
 	if err != nil {
-		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	if exists {
-		err := RemoveVote(db, voteRequest.VoterID, voteRequest.VotedUserID)
-		if err != nil {
-			utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-		user, err := GetUserByID(voteRequest.VotedUserID.String())
-		if err != nil {
-			utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-		utils.RespondWithJSON(w, http.StatusOK, user)
-		return
-	}
-
-	stmt, err := db.Prepare("INSERT INTO votes (voter_id, voted_user_id) VALUES ($1, $2)")
-	if err != nil {
-		utils.RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Couldn't prepare statement: %v", err))
-		return
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec(voteRequest.VoterID, voteRequest.VotedUserID)
-	if err != nil {
-		utils.RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Couldn't execute statement: %v", err))
-		return
-	}
-
-	_, err = db.Exec("UPDATE users SET rating = rating + 1 WHERE id = $1", voteRequest.VotedUserID)
-	if err != nil {
-		utils.RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Couldn't update user rating: %v", err))
+		utils.RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Couldn't upsert vote: %v", err))
 		return
 	}
 
 	user, err := GetUserByID(voteRequest.VotedUserID.String())
-
 	if err != nil {
-		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		utils.RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Couldn't retrieve user: %v", err))
 		return
 	}
 
-	user.Has_voted, err = hasUserVoted(db, voteRequest.VoterID.String(), voteRequest.VotedUserID.String())
-
-	if err != nil {
-		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
 	utils.RespondWithJSON(w, http.StatusOK, user)
 }

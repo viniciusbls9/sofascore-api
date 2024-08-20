@@ -37,13 +37,13 @@ func HandlerCreateUserUseCase(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	stmt, err := db.Prepare("INSERT INTO users (id, name, email, velocity, fav_position, rating, biography, image_url) VALUES($1, $2, $3, $4, $5, $6, $7, $8)")
+	stmt, err := db.Prepare("INSERT INTO users (id, name, email, fav_position, biography, image_url) VALUES($1, $2, $3, $4, $5, $6)")
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Couldn't prepare statement: %v", err))
 		return
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(uuid.New(), user.Name, user.Email, user.Velocity, user.Fav_position, user.Rating, user.Biography, user.Image_url)
+	_, err = stmt.Exec(uuid.New(), user.Name, user.Email, user.Fav_position, user.Biography, user.Image_url)
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Couldn't execute statement: %v", err))
 		return
