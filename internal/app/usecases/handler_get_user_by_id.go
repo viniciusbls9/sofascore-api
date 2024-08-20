@@ -9,8 +9,14 @@ import (
 
 func HandlerGetUserByID(w http.ResponseWriter, r *http.Request) {
 	userID := chi.URLParam(r, "userID")
+	loggedInUserID := r.URL.Query().Get("logged_in_user_id")
 
-	user, err := GetUserByID(userID)
+	if loggedInUserID == "" {
+		utils.RespondWithError(w, http.StatusInternalServerError, "loggedIn user not foud")
+		return
+	}
+
+	user, err := GetUserByID(userID, loggedInUserID)
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return

@@ -7,7 +7,7 @@ import (
 	"github.com/viniciusbls9/sofascore-api/internal/infrastructure/db"
 )
 
-func GetUserByEmail(email string) (*entity.User, error) {
+func GetUserByEmail(email string, loggedInUserID string) (*entity.User, error) {
 	db, err := db.HandlerOpenDatabaseConnection()
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %v", err)
@@ -23,6 +23,14 @@ func GetUserByEmail(email string) (*entity.User, error) {
 			return nil, nil // No user found
 		}
 		return nil, fmt.Errorf("failed to query user: %v", err)
+	}
+
+	if loggedInUserID != "" {
+		vote, err := getUserVote(db, loggedInUserID, user.ID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get user vote: %v", err)
+		}
+		user.AverageVotes = vote
 	}
 
 	return &user, nil

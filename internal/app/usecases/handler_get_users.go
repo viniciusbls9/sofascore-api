@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 
@@ -11,6 +12,12 @@ import (
 
 func HandlerGetUsers(w http.ResponseWriter, r *http.Request) {
 	var users []entity.User
+	loggedInUserID := r.URL.Query().Get("logged_user_id")
+
+	if loggedInUserID == "" {
+		utils.RespondWithError(w, http.StatusInternalServerError, "loggedIn user not foud")
+		return
+	}
 
 	db, err := db.HandlerOpenDatabaseConnection()
 	if err != nil {
@@ -19,7 +26,9 @@ func HandlerGetUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	rows, err := db.Query("SELECT * FROM users")
+	validateIfLoggedInUserExists(db, loggedInUserID, w)
+
+	rows, err := db.Query("SELECT * FROM users WHERE id !=$1", loggedInUserID)
 
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Couldn't query DB: %v", err))
@@ -44,8 +53,30 @@ func HandlerGetUsers(w http.ResponseWriter, r *http.Request) {
 
 		user.AverageVotes = averageVotes
 
+		// Obter a nota dada pelo usuário logado
+		userVote, err := getUserVote(db, loggedInUserID, user.ID)
+		if err != nil {
+			utils.RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to get user vote: %v", err))
+			return
+		}
+		user.CurrentUserVotes = userVote
+
 		users = append(users, user)
 	}
 
 	utils.RespondWithJSON(w, http.StatusOK, users)
+}
+
+func validateIfLoggedInUserExists(db *sql.DB, loggedInUserID string, w http.ResponseWriter) {
+	var id string
+	row := db.QueryRow("SELECT id FROM users WHERE id=$1", loggedInUserID)
+
+	if err := row.Scan(&id); err != nil {
+		if err == sql.ErrNoRows {
+			utils.RespondWithError(w, http.StatusNotFound, "Logged in user does not exist")
+		} else {
+			utils.RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to validate logged in user: %v", err))
+		}
+		return
+	}
 }

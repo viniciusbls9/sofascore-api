@@ -8,7 +8,7 @@ import (
 	"github.com/viniciusbls9/sofascore-api/internal/infrastructure/db"
 )
 
-func GetUserByID(userID string) (*entity.User, error) {
+func GetUserByID(userID string, loggedInUserID string) (*entity.User, error) {
 	db, err := db.HandlerOpenDatabaseConnection()
 	if err != nil {
 		return nil, fmt.Errorf("couldn't open database connection: %v", err)
@@ -23,6 +23,15 @@ func GetUserByID(userID string) (*entity.User, error) {
 			return nil, fmt.Errorf("user not found: %v", err)
 		}
 		return nil, fmt.Errorf("couldn't query DB: %v", err)
+	}
+
+	if loggedInUserID != "" {
+		vote, err := getUserVote(db, loggedInUserID, user.ID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get user vote: %v", err)
+		}
+		user.AverageVotes = vote
+		user.CurrentUserVotes = vote
 	}
 
 	return &user, nil
