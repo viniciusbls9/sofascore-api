@@ -23,6 +23,10 @@ type User struct {
 	Fav_position     string       `json:"fav_position"`
 	Biography        string       `json:"biography"`
 	Image_url        string       `json:"image_url"`
+	Age              string       `json:"age"`
+	Height           string       `json:"height"`
+	Preferred_foot   string       `json:"preferred_foot"`
+	Shirt_number     string       `json:"shirt_number"`
 	Created_at       time.Time    `json:"created_at"`
 	AverageVotes     AverageVotes `json:"average_votes"`
 	CurrentUserVotes AverageVotes `json:"current_user_votes"`

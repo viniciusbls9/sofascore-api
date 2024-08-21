@@ -3,16 +3,15 @@ package usecases
 import (
 	"net/http"
 
-	"github.com/go-chi/chi"
 	"github.com/viniciusbls9/sofascore-api/internal/app/utils"
 )
 
 func HandlerGetUserByID(w http.ResponseWriter, r *http.Request) {
-	userID := chi.URLParam(r, "userID")
+	userID := r.URL.Query().Get("user_id")
 	loggedInUserID := r.URL.Query().Get("logged_in_user_id")
 
 	if loggedInUserID == "" {
-		utils.RespondWithError(w, http.StatusInternalServerError, "loggedIn user not foud")
+		utils.RespondWithError(w, http.StatusInternalServerError, "loggedIn user not found")
 		return
 	}
 

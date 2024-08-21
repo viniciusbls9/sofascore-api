@@ -26,9 +26,14 @@ func HandlerGetUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	validateIfLoggedInUserExists(db, loggedInUserID, w)
+	err = validateIfLoggedInUserExists(db, loggedInUserID)
 
-	rows, err := db.Query("SELECT * FROM users WHERE id !=$1", loggedInUserID)
+	if err != nil {
+		utils.RespondWithError(w, http.StatusNotFound, err.Error())
+		return
+	}
+
+	rows, err := db.Query("SELECT * FROM users")
 
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Couldn't query DB: %v", err))
@@ -39,7 +44,7 @@ func HandlerGetUsers(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var user entity.User
-		if err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Fav_position, &user.Biography, &user.Created_at, &user.Image_url); err != nil {
+		if err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Fav_position, &user.Biography, &user.Created_at, &user.Image_url, &user.Age, &user.Height, &user.Preferred_foot, &user.Shirt_number); err != nil {
 			utils.RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Couldn't scan rows DB: %v", err))
 			return
 		}
@@ -67,16 +72,15 @@ func HandlerGetUsers(w http.ResponseWriter, r *http.Request) {
 	utils.RespondWithJSON(w, http.StatusOK, users)
 }
 
-func validateIfLoggedInUserExists(db *sql.DB, loggedInUserID string, w http.ResponseWriter) {
+func validateIfLoggedInUserExists(db *sql.DB, loggedInUserID string) error {
 	var id string
-	row := db.QueryRow("SELECT id FROM users WHERE id=$1", loggedInUserID)
+	row := db.QueryRow("SELECT id FROM users WHERE id = $1", loggedInUserID)
 
 	if err := row.Scan(&id); err != nil {
 		if err == sql.ErrNoRows {
-			utils.RespondWithError(w, http.StatusNotFound, "Logged in user does not exist")
-		} else {
-			utils.RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to validate logged in user: %v", err))
+			return fmt.Errorf("logged in user does not exist")
 		}
-		return
+		return fmt.Errorf("failed to validate logged in user: %v", err)
 	}
+	return nil
 }

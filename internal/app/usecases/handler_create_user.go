@@ -19,7 +19,7 @@ func HandlerCreateUserUseCase(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	existingUser, err := GetUserByEmail(user.Email, "")
+	existingUser, err := GetUserByEmail(user.Email)
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to check user existence: %v", err))
 		return
@@ -37,13 +37,13 @@ func HandlerCreateUserUseCase(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	stmt, err := db.Prepare("INSERT INTO users (id, name, email, fav_position, biography, image_url) VALUES($1, $2, $3, $4, $5, $6)")
+	stmt, err := db.Prepare("INSERT INTO users (id, name, email, fav_position, biography, image_url, age, height, preferred_foot, shirt_number) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)")
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Couldn't prepare statement: %v", err))
 		return
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(uuid.New(), user.Name, user.Email, user.Fav_position, user.Biography, user.Image_url)
+	_, err = stmt.Exec(uuid.New(), user.Name, user.Email, user.Fav_position, user.Biography, user.Image_url, user.Age, user.Height, user.Preferred_foot, user.Shirt_number)
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Couldn't execute statement: %v", err))
 		return
