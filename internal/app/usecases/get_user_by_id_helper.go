@@ -17,7 +17,7 @@ func GetUserByID(userID string, loggedInUserID string) (*entity.User, error) {
 
 	var user entity.User
 	err = db.QueryRow("SELECT id, name, email, fav_position, biography, created_at, image_url, age, height, preferred_foot, shirt_number FROM users WHERE id=$1", userID).Scan(
-		&user.ID, &user.Name, &user.Email, &user.Fav_position, &user.Biography, &user.Created_at, &user.Image_url, &user.Age, &user.Height, &user.Preferred_foot, &user.Shirt_number)
+		&user.ID, &user.Name, &user.Email, &user.Fav_position, &user.Biography, &user.Image_url, &user.Age, &user.Height, &user.Preferred_foot, &user.Shirt_number, &user.Created_at)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("user not found: %v", err)

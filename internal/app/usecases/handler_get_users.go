@@ -44,7 +44,7 @@ func HandlerGetUsers(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var user entity.User
-		if err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Fav_position, &user.Biography, &user.Created_at, &user.Image_url, &user.Age, &user.Height, &user.Preferred_foot, &user.Shirt_number); err != nil {
+		if err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Fav_position, &user.Biography, &user.Image_url, &user.Age, &user.Height, &user.Preferred_foot, &user.Shirt_number, &user.Created_at); err != nil {
 			utils.RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Couldn't scan rows DB: %v", err))
 			return
 		}
