@@ -33,7 +33,7 @@ type User struct {
 }
 
 type AverageVotes struct {
-	PassVote       int16   `json:"pass_vote"`
+	PassVote       float64 `json:"pass_vote"`
 	ShotVote       float64 `json:"shot_vote"`
 	MarkingVote    float64 `json:"marking_vote"`
 	QualityVote    float64 `json:"quality_vote"`

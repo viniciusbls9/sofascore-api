@@ -25,13 +25,5 @@ func GetUserByEmail(email string) (*entity.User, error) {
 		return nil, fmt.Errorf("failed to query user: %v", err)
 	}
 
-	// if loggedInUserID != "" {
-	// 	vote, err := getUserVote(db, loggedInUserID, user.ID)
-	// 	if err != nil {
-	// 		return nil, fmt.Errorf("failed to get user vote: %v", err)
-	// 	}
-	// 	user.AverageVotes = vote
-	// }
-
 	return &user, nil
 }

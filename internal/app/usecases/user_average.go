@@ -9,6 +9,7 @@ import (
 
 func getAverageVotes(db *sql.DB, userID string) (entity.AverageVotes, error) {
 	var (
+		totalPassVote     int
 		totalShotVote     int
 		totalMarkingVote  int
 		totalQualityVote  int
@@ -18,6 +19,7 @@ func getAverageVotes(db *sql.DB, userID string) (entity.AverageVotes, error) {
 
 	err := db.QueryRow(`
 		SELECT
+			COALESCE(SUM(pass_vote), 0) AS total_pass_vote,
 			COALESCE(SUM(shot_vote), 0) AS total_shot_vote,
 			COALESCE(SUM(marking_vote), 0) AS total_marking_vote,
 			COALESCE(SUM(quality_vote), 0) AS total_quality_vote,
@@ -25,7 +27,7 @@ func getAverageVotes(db *sql.DB, userID string) (entity.AverageVotes, error) {
 			COUNT(*) AS total_votes
 		FROM votes
 		WHERE voted_user_id = $1
-	`, userID).Scan(&totalShotVote, &totalMarkingVote, &totalQualityVote, &totalVelocityVote, &totalVotes)
+	`, userID).Scan(&totalPassVote, &totalShotVote, &totalMarkingVote, &totalQualityVote, &totalVelocityVote, &totalVotes)
 
 	if err != nil {
 		return entity.AverageVotes{}, fmt.Errorf("couldn't get average votes: %v", err)
@@ -34,11 +36,12 @@ func getAverageVotes(db *sql.DB, userID string) (entity.AverageVotes, error) {
 	var averageVotes entity.AverageVotes
 
 	if totalVotes > 0 {
+		averageVotes.PassVote = float64(totalPassVote) / float64(totalVotes)
 		averageVotes.ShotVote = float64(totalShotVote) / float64(totalVotes)
 		averageVotes.MarkingVote = float64(totalMarkingVote) / float64(totalVotes)
 		averageVotes.QualityVote = float64(totalQualityVote) / float64(totalVotes)
 		averageVotes.VelocityVote = float64(totalVelocityVote) / float64(totalVotes)
-		averageVotes.OverallAverage = (averageVotes.ShotVote + averageVotes.MarkingVote + averageVotes.QualityVote + averageVotes.VelocityVote) / 4
+		averageVotes.OverallAverage = (averageVotes.PassVote + averageVotes.ShotVote + averageVotes.MarkingVote + averageVotes.QualityVote + averageVotes.VelocityVote) / 5
 	}
 
 	return averageVotes, nil
@@ -60,6 +63,18 @@ func getUserVote(db *sql.DB, voterID string, votedUserID string) (entity.Average
 		}
 		return vote, fmt.Errorf("couldn't get user vote: %v", err)
 	}
+
+	averageVotes, err := getAverageVotes(db, votedUserID)
+	if err != nil {
+		return vote, fmt.Errorf("failed to calculate average votes: %v", err)
+	}
+
+	vote.MarkingVote = averageVotes.MarkingVote
+	vote.OverallAverage = averageVotes.OverallAverage
+	vote.PassVote = averageVotes.PassVote
+	vote.QualityVote = averageVotes.QualityVote
+	vote.ShotVote = averageVotes.ShotVote
+	vote.VelocityVote = averageVotes.VelocityVote
 
 	return vote, nil
 }
